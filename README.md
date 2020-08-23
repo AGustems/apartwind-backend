@@ -20,10 +20,6 @@ Roomer is an app that helps you find your perfect roommate. You can easily brows
 * **Log out**: As a user I want to be able to log out from the app to make sure that no one access it or so that another person can access with their own account.
 * **User profile**: As a user I want to access, update or even delete my account.
 * **User details**: As a user I want to know the basic information of the advertiser of an add and possible roommate.
-* **Conact user**: As a user I want to be able to contact the advertiser of an add that has captured my interest and talk to them.
-* **Filter room list**: As a user I want to filter the room adverts by it's main properties, like location, price range, etc.
-* **Order room list**: As a user I want to order the advert according to it's price, posting date, etc.
-* **Search room list**: As a user I want to search for a room in an specific location.
 * **Create room**: As a user I want to be able to post a room advert so that it appears on the rooms list and possible roommates can access it's information.
 * **Add room pictures**: As a user I want to add pictures to my advert so that people can see the house/apartment/other.
 * **Add room location**: As a user I want to add the location of the room in my advert so that people interested in the location can see it.
