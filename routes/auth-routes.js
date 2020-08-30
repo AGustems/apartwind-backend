@@ -46,18 +46,22 @@ authRoutes.post('/signup', (req, res, next) =>{
 
     // Saving the non required data
     // Pending location => const location = Location.find()...
+    const age = req.body.age ? req.body.age : 99
+    const occupation = req.body.occupation ? req.body.occupation : 'No occupation provided'
     const description = req.body.description ? req.body.description : 'No description provided'
-    const characteristics = req.body.characteristics ? req.body.characteristics : 'No characteristics provided'
+    const characteristics = req.body.characteristics ? req.body.characteristics : ['No characteristics provided']
     const socials = {
-      facebook: req.body.socials.facebook ? req.body.socials.facebook : 'No Facebook information required' ,
-      twitter: req.body.socials.twitter ? req.body.socials.twitter : 'No Twitter information required',
-      instagram: req.body.socials.instagram ? req.body.socials.instagram : 'No Instagram information required',
+      facebook: req.body.socials.facebook ? req.body.socials.facebook : 'No Facebook information provided' ,
+      twitter: req.body.socials.twitter ? req.body.socials.twitter : 'No Twitter information provided',
+      instagram: req.body.socials.instagram ? req.body.socials.instagram : 'No Instagram information provided',
     }
 
     // Creation of the new user
     const newUser = new User({
       name: name,
       surname: surname,
+      occupation: occupation,
+      age: age,
       email: email,
       password: hashPass,
       // location:location

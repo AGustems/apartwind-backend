@@ -18,17 +18,15 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
+  occupation: String,
+  age: Number,
   location: {
     type: Schema.Types.ObjectId,
     ref: 'Location'
   },
   description: String,
   characteristics: [String],
-  socials:{
-    facebook: String,
-    twitter: String,
-    instagram: String
-  },
+  socials:Object,
   favourites: {
     type: [Schema.Types.ObjectId],
     ref: 'Room'

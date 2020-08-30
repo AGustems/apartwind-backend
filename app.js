@@ -13,6 +13,7 @@ const debug = require('debug')(`${app_name}:${path.basename(__filename).split('.
 const app = express();
 const session       = require('express-session');
 const passport      = require('passport');
+const cors = require('cors')
 require('./configs/passport-config');
 
 // Database configuration
@@ -52,6 +53,13 @@ app.use(passport.session())
 app.locals.title = 'Roomer - The best platform for finding your new roommate';
 
 // Space for cors settings
+app.use(
+  cors({
+    credentials: true,
+    origin: ['http://localhost:3000']
+  })
+)
+
 
 // Routes middlewares
 const index = require('./routes/index');
