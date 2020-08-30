@@ -19,11 +19,11 @@ const userSchema = new Schema({
     required: true
   },
   occupation: String,
-  age: Number,
-  location: {
-    type: Schema.Types.ObjectId,
-    ref: 'Location'
+  imageUrl: {
+    type: String,
+    default: 'https://res.cloudinary.com/agustems/image/upload/v1598692094/roomer/newUser_pmu8bv.png'
   },
+  age: Number,
   description: String,
   characteristics: [String],
   socials:Object,

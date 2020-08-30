@@ -7,7 +7,7 @@ const { hash } = require('bcryptjs')
 
 
 // SIGNUP ROUTES
-authRoutes.post('/signup', (req, res, next) =>{
+authRoutes.post('/signup',(req, res, next) =>{
   // Saving the required data
   const name = req.body.name
   const surname = req.body.surname
@@ -45,15 +45,14 @@ authRoutes.post('/signup', (req, res, next) =>{
     const hashPass = bcrypt.hashSync(password, salt);
 
     // Saving the non required data
-    // Pending location => const location = Location.find()...
     const age = req.body.age ? req.body.age : 99
     const occupation = req.body.occupation ? req.body.occupation : 'No occupation provided'
     const description = req.body.description ? req.body.description : 'No description provided'
     const characteristics = req.body.characteristics ? req.body.characteristics : ['No characteristics provided']
-    const socials = {
-      facebook: req.body.socials.facebook ? req.body.socials.facebook : 'No Facebook information provided' ,
-      twitter: req.body.socials.twitter ? req.body.socials.twitter : 'No Twitter information provided',
-      instagram: req.body.socials.instagram ? req.body.socials.instagram : 'No Instagram information provided',
+    const socials = req.body.socials ? req.body.socials : {
+      facebook: 'No Facebook information provided' ,
+      twitter: 'No Twitter information provided',
+      instagram: 'No Instagram information provided',
     }
 
     // Creation of the new user
@@ -64,7 +63,6 @@ authRoutes.post('/signup', (req, res, next) =>{
       age: age,
       email: email,
       password: hashPass,
-      // location:location
       description: description,
       characteristics: characteristics,
       socials: socials

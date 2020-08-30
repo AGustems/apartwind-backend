@@ -64,8 +64,10 @@ app.use(
 // Routes middlewares
 const index = require('./routes/index');
 const authRoutes = require('./routes/auth-routes');
+const userRoutes = require('./routes/user-routes');
 
 app.use('/', index);
 app.use('/auth', authRoutes)
+app.use('/userprofile', userRoutes)
 
 module.exports = app;
