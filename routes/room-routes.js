@@ -49,7 +49,7 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     // Saving the required data into variables
     const owner = req.body.owner
     const property = req.body.property
-    //const location = JSON.parse(req.body.location)
+    const location = JSON.parse(req.body.location)
     const price = req.body.price
     const size = req.body.size
     const bedrooms = req.body.bedrooms
@@ -75,7 +75,7 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     // Creation of the new room
     const newRoom = new Room({
         owner: owner, property: property,
-        //location: location,
+        location: location,
         images: images,
         price: price,
         size: size,

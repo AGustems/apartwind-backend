@@ -3,6 +3,7 @@ const userRoutes = express.Router()
 const User = require('../models/user-model')
 const uploader = require('../configs/cloudinary-config')
 
+// GET CONCRET USER INFORMATION
 userRoutes.get('/:id', async(req, res, next) => {
   // Return the user with the id sent as a parameter in the URL
   try{
