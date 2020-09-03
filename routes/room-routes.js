@@ -8,7 +8,9 @@ const Room = require('../models/room-model')
 roomRoutes.get('/', async(req, res, next) => {
     // Return all the rooms in the database
     try {
-        const rooms = await Room.find();
+        const rooms = await Room
+            .find()
+            .populate('owner');
         res
             .status(200)
             .json(rooms)
@@ -38,6 +40,7 @@ roomRoutes.get('/:id', async(req, res, next) => {
 // ADD ROOM ROUTE
 roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     // Putting the paths of the images inside an array
+    console.log(req.files[0])
     const images = []
     if (req.files) {
         const files = req.files
@@ -74,7 +77,8 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
 
     // Creation of the new room
     const newRoom = new Room({
-        owner: owner, property: property,
+        owner: owner,
+        property: property,
         location: location,
         images: images,
         price: price,
@@ -118,6 +122,40 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     }, {
         adverts: roomIds
     }, {new: true})
+
+})
+
+// PATCH ROOM ROUTE
+roomRoutes.patch('/:id', async(req, res, next) => {
+    const userId = req.body.userId
+    const roomId = req.params.id
+
+    const user = await User.findOne({_id: userId})
+
+    try {
+        let newFav = user.favourites
+        if (newFav === []) {
+            newFav = [roomId]
+        } else if (newFav.includes(roomId)) {
+            newFav.splice((newFav.indexOf(roomId)), 1)
+        } else {
+            newFav.push(roomId)
+        }
+
+        const updateUser = await User.findOneAndUpdate({
+            _id: userId
+        }, {
+            favourites: newFav
+        }, {new: true})
+        res
+            .status(200)
+            .json(updateUser)
+    } catch (error) {
+        res
+            .status(500)
+            .json({message: "Error while updating the favourites information"})
+        next(error)
+    }
 
 })
 
