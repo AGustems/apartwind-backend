@@ -8,6 +8,7 @@
     "dev-windows": "nodemon ./bin/www"
   },
   "dependencies": {
+    "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
@@ -25,7 +26,8 @@
     "node-sass-middleware": "^0.11.0",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "unidecode": "^0.1.8"
   },
   "devDependencies": {
     "nodemon": "^1.12.1"

@@ -9,7 +9,7 @@ const roomSchema = new Schema({
   },
   property: {
     type: String,
-    enum : ['house','flat','other'],
+    enum : ['House','Flat','Other'],
     required: true
   },
   location: {
