@@ -26,7 +26,7 @@ roomRoutes.get('/', async(req, res, next) => {
 roomRoutes.get('/:id', async(req, res, next) => {
     // Return the room with the id sent as a parameter on the URL
     try {
-        const room = await Room.find({_id: req.params.id})
+        const room = await Room.findOne({_id: req.params.id}).populate("owner")
         res
             .status(200)
             .json(room)
@@ -161,10 +161,19 @@ roomRoutes.patch('/:id', async(req, res, next) => {
 
 // UPDATE ROOM ROUTE
 roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
+    // Checking if more images have been sent and adding the new ones
+    let images = JSON.parse(req.body.oldImages)
+    if (req.files) {
+        const files = req.files
+        for (let i = 0; i < files.length; i++) {
+            images.push(files[i].path)
+        }
+    }
+    
     // Saving the required data into variables
     const updateData = req.body
     const property = req.body.property
-    // const location = JSON.parse(req.body.location)
+    const location = JSON.parse(req.body.location)
     const price = req.body.price
     const size = req.body.size
     const bedrooms = req.body.bedrooms
@@ -172,32 +181,21 @@ roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
 
     // Saving the images and making the necessary tranformation because of the new
     // FormData in the frontend
-    let images = req.body.images
     const amenities = JSON.parse(req.body.amenities)
     const flatmates = JSON.parse(req.body.flatmates)
     const tolerance = JSON.parse(req.body.tolerance)
     updateData.amenities = amenities
     updateData.flatmates = flatmates
     updateData.tolerance = tolerance
-    //updateData.location = location Checking if the required data has been sent
+    updateData.location = location
+    updateData.images = images 
+
+    //Checking if the required data has been sent
     if (property === '' || price === 0 || size === '' || bedrooms === 0 || bathrooms === 0) {
         res
             .status(400)
             .json({message: 'Please, provide all the required information'})
         return
-    }
-
-    // Checking if more images have been sent and adding the new ones
-    if (req.files) {
-        if (images === ['https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klm' +
-                'dah.png']) {
-            images = []
-        }
-        const files = req.files
-        for (let i = 0; i < files.length; i++) {
-            images.push(files[i].path)
-        }
-        updateData.images = images
     }
 
     // Finding the room and updating it with the information sent

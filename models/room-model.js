@@ -29,7 +29,7 @@ const roomSchema = new Schema({
     required: true
   },
   availability: Date,
-  ammenities: {
+  amenities: {
     living: Boolean,
     internet: Boolean,
     parking: Boolean,
