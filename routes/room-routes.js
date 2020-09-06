@@ -11,6 +11,14 @@ roomRoutes.get('/', async(req, res, next) => {
         const rooms = await Room
             .find()
             .populate('owner');
+
+        if (rooms.length < 0) {
+            res
+                .status(404)
+                .json({message: "There are no rooms available at the moment"})
+            return
+        }
+
         res
             .status(200)
             .json(rooms)
@@ -26,7 +34,17 @@ roomRoutes.get('/', async(req, res, next) => {
 roomRoutes.get('/:id', async(req, res, next) => {
     // Return the room with the id sent as a parameter on the URL
     try {
-        const room = await Room.findOne({_id: req.params.id}).populate("owner")
+        const room = await Room
+            .findOne({_id: req.params.id})
+            .populate("owner")
+
+        if (room.length !== 1) {
+            res
+                .status(500)
+                .json({message: 'Error while trying to retrieve the room information'})
+            return
+        }
+
         res
             .status(200)
             .json(room)
@@ -34,13 +52,13 @@ roomRoutes.get('/:id', async(req, res, next) => {
         res
             .status(500)
             .json({message: 'Error while trying to retrieve the room information'})
+        next(error)
     }
 })
 
 // ADD ROOM ROUTE
 roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     // Putting the paths of the images inside an array
-    console.log(req.files[0])
     const images = []
     if (req.files) {
         const files = req.files
@@ -63,6 +81,7 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
         res
             .status(400)
             .json({message: 'Please, provide all the required information'})
+        return
     }
 
     // Saving the non required data into variables
@@ -111,18 +130,25 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
             .json(newRoom)
     })
 
-    // Find the Rooms that the owner has created the room
-    const findRooms = await Room.find({owner: owner})
-    const roomIds = []
-    findRooms.map(item => roomIds.push(item._id))
-    console.log(roomIds)
-    // Updating the user with the new info
-    const updateUser = await User.findOneAndUpdate({
-        _id: owner
-    }, {
-        adverts: roomIds
-    }, {new: true})
+    // Updating the owner information of the rooms array
+    try {
+        // Find the Rooms that the owner has created the room
+        const findRooms = await Room.find({owner: owner})
+        const roomIds = []
+        findRooms.map(item => roomIds.push(item._id))
 
+        // Updating the user with the new info
+        const updateUser = await User.findOneAndUpdate({
+            _id: owner
+        }, {
+            adverts: roomIds
+        }, {new: true})
+    } catch (err) {
+        res
+            .status(500)
+            .json({message: "Error while updating the user's information"})
+        next(error)
+    }
 })
 
 // PATCH ROOM ROUTE
@@ -147,6 +173,7 @@ roomRoutes.patch('/:id', async(req, res, next) => {
         }, {
             favourites: newFav
         }, {new: true})
+        
         res
             .status(200)
             .json(updateUser)
@@ -169,7 +196,7 @@ roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
             images.push(files[i].path)
         }
     }
-    
+
     // Saving the required data into variables
     const updateData = req.body
     const property = req.body.property
@@ -188,7 +215,7 @@ roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
     updateData.flatmates = flatmates
     updateData.tolerance = tolerance
     updateData.location = location
-    updateData.images = images 
+    updateData.images = images
 
     //Checking if the required data has been sent
     if (property === '' || price === 0 || size === '' || bedrooms === 0 || bathrooms === 0) {
@@ -223,6 +250,7 @@ roomRoutes.delete('/:id/delete', (req, res, next) => {
             res
                 .status(500)
                 .json({message: "Error while trying to delete the room"})
+            return
         } else {
             res
                 .status(200)

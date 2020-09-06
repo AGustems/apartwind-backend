@@ -17,6 +17,14 @@ userRoutes.get('/:id', async(req, res, next) => {
             })
             .populate("adverts")   
         
+        // Checking if there is the specified user in the database
+        if(user.length !== 1){
+            res.
+                status(404)
+                .json({message: 'This user does not exist'})
+            return
+        }
+
         res
             .status(200)
             .json(user)
@@ -24,6 +32,7 @@ userRoutes.get('/:id', async(req, res, next) => {
         res
             .status(500)
             .json({message: 'Error while trying to retrieve the user information'})
+        next(error)
     }
 })
 
@@ -79,10 +88,12 @@ userRoutes.delete('/:id/delete', (req, res, next) => {
             res
                 .status(500)
                 .json({message: "Error while trying to delete the user"})
+            return
         } else {
             res
                 .status(200)
                 .json({message: "The following user has been errased: ", docs})
+            return
         }
     }, {new: true})
 })

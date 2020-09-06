@@ -22,7 +22,7 @@ authRoutes.post('/signup',(req, res, next) =>{
     return
   }
 
-  // Checking if the user already exists and sending feedback
+  // Checking if the email is valid and if it already exists and sending feedback
   User.findOne({
     email
   }, (err, emailFound) => {
@@ -39,6 +39,15 @@ authRoutes.post('/signup',(req, res, next) =>{
         .json({message: 'This email has already been used'})
         return;
     }
+
+    // Checking that the password meets the necessary format
+    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
+    if (!regex.test(password)) {
+      res
+        .status(400)
+        .json({message: 'The password needs to have at least 8 characters and must contain at least one number, one lowercase and one uppercase letter.'})
+        return;
+    };
 
     // Password encription
     const salt = bcrypt.genSaltSync(10);
@@ -82,7 +91,7 @@ authRoutes.post('/signup',(req, res, next) =>{
         if(err) {
           res
             .status(500)
-            .json({message: 'Something went wrong while logging in'})
+            .json({message: 'Something went wrong while trying to logging in'})
           return;
         }
 
