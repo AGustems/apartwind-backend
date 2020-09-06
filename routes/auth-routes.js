@@ -22,7 +22,7 @@ authRoutes.post('/signup',(req, res, next) =>{
     return
   }
 
-  // Checking if the email is valid and if it already exists and sending feedback
+  // Checking if the email already exists and sending feedback
   User.findOne({
     email
   }, (err, emailFound) => {
@@ -40,9 +40,18 @@ authRoutes.post('/signup',(req, res, next) =>{
         return;
     }
 
+    // Checking if the email has the required format
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if(!emailRegex.test(email)){
+      res
+        .status(400)
+        .json({message: "The email has an incorrect format, please submit a valid email"})
+        return;
+    }
+
     // Checking that the password meets the necessary format
-    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
-    if (!regex.test(password)) {
+    const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
+    if (!passwordRegex.test(password)) {
       res
         .status(400)
         .json({message: 'The password needs to have at least 8 characters and must contain at least one number, one lowercase and one uppercase letter.'})
@@ -59,9 +68,42 @@ authRoutes.post('/signup',(req, res, next) =>{
     const description = req.body.description ? req.body.description : 'No description provided'
     const characteristics = req.body.characteristics ? req.body.characteristics : ['No characteristics provided']
     const socials = req.body.socials ? req.body.socials : {
-      facebook: 'No Facebook information provided' ,
-      twitter: 'No Twitter information provided',
-      instagram: 'No Instagram information provided',
+      facebook: '' ,
+      twitter: '',
+      instagram: '',
+    }
+
+    // Checking if the socials are empty or have the required format (FACEBOOK)
+    const facebookRegex = /^(https?:\/\/)?(www\.)?facebook.com\/[a-zA-Z0-9(\.\?)?]/
+    if(socials.facebook !== ''){
+        if(!facebookRegex.test(socials.facebook)){
+            res
+                .status(400)
+                .json({message: "The facebook URL submited was incorrect. It must start with www.facebook.com/"})
+                return;
+        }
+    }
+    
+    // Checking if the socials are empty or have the required format (TWITTER)
+    const twitterRegex = /^(https?:\/\/)?(www\.)?twitter.com\/[a-zA-Z0-9(\.\?)?]/
+    if(socials.twitter !== ''){
+        if(!twitterRegex.test(socials.twitter)){
+            res
+                .status(400)
+                .json({message: "The twitter URL submited was incorrect. It must start with www.twitter.com/"})
+                return;
+        }
+    }
+    
+    // Checking if the socials are empty or have the required format (INSTAGRAM)
+    const instagramRegex = /^(https?:\/\/)?(www\.)?instagram.com\/[a-zA-Z0-9(\.\?)?]/
+    if(socials.instagram !== ''){
+        if(!instagramRegex.test(socials.instagram)){
+            res
+                .status(400)
+                .json({message: "The instagram URL submited was incorrect. It must start with www.instagram.com/"})
+                return;
+        }
     }
 
     // Creation of the new user
@@ -112,7 +154,7 @@ authRoutes.post('/login', (req, res, next) => {
       if (err) {
           res
               .status(500)
-              .json({message: 'Something went wrong while logging in'});
+              .json({message: 'Something went wrong while logging in, please, check if the email and password are correct.'});
           return;
       }
 

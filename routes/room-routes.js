@@ -38,7 +38,7 @@ roomRoutes.get('/:id', async(req, res, next) => {
             .findOne({_id: req.params.id})
             .populate("owner")
 
-        if (room.length !== 1) {
+        if (room === {}) {
             res
                 .status(500)
                 .json({message: 'Error while trying to retrieve the room information'})
@@ -67,6 +67,11 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
         }
     }
 
+    // Checking if the body of the images is empty and pushing a default picture if it is
+    if(req.body.images == []){
+        images.push('https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klmdah.png')
+    }
+
     // Saving the required data into variables
     const owner = req.body.owner
     const property = req.body.property
@@ -77,15 +82,38 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     const bathrooms = req.body.bathrooms
 
     // Sending feedback if the required data is missing
-    if (owner === '' || property === '' || price === 0 || size === '' || bedrooms === 0 || bathrooms === 0) {
+    if (owner === '' || property === '' || price === '' || size === '' || bedrooms === '' || bathrooms === '') {
         res
             .status(400)
             .json({message: 'Please, provide all the required information'})
         return
     }
 
+    // Checking that at least there is one bedroom and one bathroom
+    if(bedrooms < 1 || bathrooms < 1){
+        res
+            .status(400)
+            .json({message: 'There has to be at least one bedroom and one bathroom in the building'})
+        return
+    }
+
+    // Checking if the location sended is not the default one
+    if(location.direction === '' || location.lat == 0 && location.lng == 0){
+        res
+            .status(400)
+            .json({message: 'Plese, provide a valid address'})
+        return
+    }
+
+    // Checking if a date has been submitted and adding one if not
+    let availability = req.body.availability
+    if(availability == null){
+        availability= JSON.parse(req.body.availability)
+    } else {
+        availability = new Date()
+    }
+
     // Saving the non required data into variables
-    const availability = req.body.availability
     const amenities = JSON.parse(req.body.amenities)
     const flatmates = JSON.parse(req.body.flatmates)
     const pets = req.body.pets
@@ -218,10 +246,18 @@ roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
     updateData.images = images
 
     //Checking if the required data has been sent
-    if (property === '' || price === 0 || size === '' || bedrooms === 0 || bathrooms === 0) {
+    if (property === '' || price === '' || size === '' || bedrooms === '' || bathrooms === '') {
         res
             .status(400)
             .json({message: 'Please, provide all the required information'})
+        return
+    }
+
+    // Checking that at least there is one bedroom and one bathroom
+    if(bedrooms < 1 || bathrooms < 1){
+        res
+            .status(400)
+            .json({message: 'There has to be at least one bedroom and one bathroom in the building'})
         return
     }
 

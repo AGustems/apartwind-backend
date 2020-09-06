@@ -81,7 +81,7 @@ const roomSchema = new Schema({
     bedrooms: {
         type: Number,
         required: true,
-        match: [/^(?:[1-9]\d+|[1-9])$/gm, 'There has to be at least one bedroom']
+        match: [/^(?:[1-9]\d+|[2-9])$/gm, 'There has to be at least one bedroom']
     },
     bathrooms: {
         type: Number,
