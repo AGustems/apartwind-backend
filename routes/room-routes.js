@@ -67,9 +67,11 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
         }
     }
 
-    // Checking if the body of the images is empty and pushing a default picture if it is
-    if(req.body.images == []){
-        images.push('https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klmdah.png')
+    // Checking if the body of the images is empty and pushing a default picture if
+    // it is
+    if (req.body.images == []) {
+        images.push('https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klm' +
+                'dah.png')
     }
 
     // Saving the required data into variables
@@ -90,7 +92,7 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     }
 
     // Checking that at least there is one bedroom and one bathroom
-    if(bedrooms < 1 || bathrooms < 1){
+    if (bedrooms < 1 || bathrooms < 1) {
         res
             .status(400)
             .json({message: 'There has to be at least one bedroom and one bathroom in the building'})
@@ -98,7 +100,7 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     }
 
     // Checking if the location sended is not the default one
-    if(location.direction === '' || location.lat == 0 && location.lng == 0){
+    if (location.direction === '' || location.lat == 0 && location.lng == 0) {
         res
             .status(400)
             .json({message: 'Plese, provide a valid address'})
@@ -107,8 +109,8 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
 
     // Checking if a date has been submitted and adding one if not
     let availability = req.body.availability
-    if(availability == null){
-        availability= JSON.parse(req.body.availability)
+    if (availability == null) {
+        availability = JSON.parse(req.body.availability)
     } else {
         availability = new Date()
     }
@@ -201,7 +203,7 @@ roomRoutes.patch('/:id', async(req, res, next) => {
         }, {
             favourites: newFav
         }, {new: true})
-        
+
         res
             .status(200)
             .json(updateUser)
@@ -218,7 +220,12 @@ roomRoutes.patch('/:id', async(req, res, next) => {
 roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
     // Checking if more images have been sent and adding the new ones
     let images = JSON.parse(req.body.oldImages)
+
     if (req.files) {
+        if (images[0] === 'https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klm' +
+                'dah.png') {
+            images = []
+        }
         const files = req.files
         for (let i = 0; i < files.length; i++) {
             images.push(files[i].path)
@@ -254,7 +261,7 @@ roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
     }
 
     // Checking that at least there is one bedroom and one bathroom
-    if(bedrooms < 1 || bathrooms < 1){
+    if (bedrooms < 1 || bathrooms < 1) {
         res
             .status(400)
             .json({message: 'There has to be at least one bedroom and one bathroom in the building'})
