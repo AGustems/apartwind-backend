@@ -11,6 +11,14 @@ roomRoutes.get('/', async(req, res, next) => {
         const rooms = await Room
             .find()
             .populate('owner');
+
+        if (rooms.length < 0) {
+            res
+                .status(404)
+                .json({message: "There are no rooms available at the moment"})
+            return
+        }
+
         res
             .status(200)
             .json(rooms)
@@ -26,7 +34,17 @@ roomRoutes.get('/', async(req, res, next) => {
 roomRoutes.get('/:id', async(req, res, next) => {
     // Return the room with the id sent as a parameter on the URL
     try {
-        const room = await Room.findOne({_id: req.params.id}).populate("owner")
+        const room = await Room
+            .findOne({_id: req.params.id})
+            .populate("owner")
+
+        if (room === {}) {
+            res
+                .status(500)
+                .json({message: 'Error while trying to retrieve the room information'})
+            return
+        }
+
         res
             .status(200)
             .json(room)
@@ -34,19 +52,26 @@ roomRoutes.get('/:id', async(req, res, next) => {
         res
             .status(500)
             .json({message: 'Error while trying to retrieve the room information'})
+        next(error)
     }
 })
 
 // ADD ROOM ROUTE
 roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     // Putting the paths of the images inside an array
-    console.log(req.files[0])
     const images = []
     if (req.files) {
         const files = req.files
         for (let i = 0; i < files.length; i++) {
             images.push(files[i].path)
         }
+    }
+
+    // Checking if the body of the images is empty and pushing a default picture if
+    // it is
+    if (req.body.images == []) {
+        images.push('https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klm' +
+                'dah.png')
     }
 
     // Saving the required data into variables
@@ -59,14 +84,38 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
     const bathrooms = req.body.bathrooms
 
     // Sending feedback if the required data is missing
-    if (owner === '' || property === '' || price === 0 || size === '' || bedrooms === 0 || bathrooms === 0) {
+    if (owner === '' || property === '' || price === '' || size === '' || bedrooms === '' || bathrooms === '') {
         res
             .status(400)
             .json({message: 'Please, provide all the required information'})
+        return
+    }
+
+    // Checking that at least there is one bedroom and one bathroom
+    if (bedrooms < 1 || bathrooms < 1) {
+        res
+            .status(400)
+            .json({message: 'There has to be at least one bedroom and one bathroom in the building'})
+        return
+    }
+
+    // Checking if the location sended is not the default one
+    if (location.direction === '' || location.lat == 0 && location.lng == 0) {
+        res
+            .status(400)
+            .json({message: 'Plese, provide a valid address'})
+        return
+    }
+
+    // Checking if a date has been submitted and adding one if not
+    let availability = req.body.availability
+    if (availability == null) {
+        availability = JSON.parse(req.body.availability)
+    } else {
+        availability = new Date()
     }
 
     // Saving the non required data into variables
-    const availability = req.body.availability
     const amenities = JSON.parse(req.body.amenities)
     const flatmates = JSON.parse(req.body.flatmates)
     const pets = req.body.pets
@@ -111,18 +160,25 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
             .json(newRoom)
     })
 
-    // Find the Rooms that the owner has created the room
-    const findRooms = await Room.find({owner: owner})
-    const roomIds = []
-    findRooms.map(item => roomIds.push(item._id))
-    console.log(roomIds)
-    // Updating the user with the new info
-    const updateUser = await User.findOneAndUpdate({
-        _id: owner
-    }, {
-        adverts: roomIds
-    }, {new: true})
+    // Updating the owner information of the rooms array
+    try {
+        // Find the Rooms that the owner has created the room
+        const findRooms = await Room.find({owner: owner})
+        const roomIds = []
+        findRooms.map(item => roomIds.push(item._id))
 
+        // Updating the user with the new info
+        const updateUser = await User.findOneAndUpdate({
+            _id: owner
+        }, {
+            adverts: roomIds
+        }, {new: true})
+    } catch (err) {
+        res
+            .status(500)
+            .json({message: "Error while updating the user's information"})
+        next(error)
+    }
 })
 
 // PATCH ROOM ROUTE
@@ -147,6 +203,7 @@ roomRoutes.patch('/:id', async(req, res, next) => {
         }, {
             favourites: newFav
         }, {new: true})
+
         res
             .status(200)
             .json(updateUser)
@@ -163,13 +220,18 @@ roomRoutes.patch('/:id', async(req, res, next) => {
 roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
     // Checking if more images have been sent and adding the new ones
     let images = JSON.parse(req.body.oldImages)
+
     if (req.files) {
+        if (images[0] === 'https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klm' +
+                'dah.png') {
+            images = []
+        }
         const files = req.files
         for (let i = 0; i < files.length; i++) {
             images.push(files[i].path)
         }
     }
-    
+
     // Saving the required data into variables
     const updateData = req.body
     const property = req.body.property
@@ -188,13 +250,21 @@ roomRoutes.put('/:id/edit', uploader.array("images"), async(req, res, next) => {
     updateData.flatmates = flatmates
     updateData.tolerance = tolerance
     updateData.location = location
-    updateData.images = images 
+    updateData.images = images
 
     //Checking if the required data has been sent
-    if (property === '' || price === 0 || size === '' || bedrooms === 0 || bathrooms === 0) {
+    if (property === '' || price === '' || size === '' || bedrooms === '' || bathrooms === '') {
         res
             .status(400)
             .json({message: 'Please, provide all the required information'})
+        return
+    }
+
+    // Checking that at least there is one bedroom and one bathroom
+    if (bedrooms < 1 || bathrooms < 1) {
+        res
+            .status(400)
+            .json({message: 'There has to be at least one bedroom and one bathroom in the building'})
         return
     }
 
@@ -223,6 +293,7 @@ roomRoutes.delete('/:id/delete', (req, res, next) => {
             res
                 .status(500)
                 .json({message: "Error while trying to delete the room"})
+            return
         } else {
             res
                 .status(200)
