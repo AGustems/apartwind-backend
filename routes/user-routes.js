@@ -2,6 +2,7 @@ const express = require('express')
 const userRoutes = express.Router()
 const User = require('../models/user-model')
 const uploader = require('../configs/cloudinary-config')
+const {transporter, goodbye} = require('../configs/nodemailer-config');
 
 // GET CONCRET USER INFORMATION
 userRoutes.get('/:id', async(req, res, next) => {
@@ -122,9 +123,18 @@ userRoutes.put('/:id', uploader.single("imageUrl"), async(req, res, next) => {
 })
 
 // DELETE USERPROFILE ROUTE
-userRoutes.delete('/:id/delete', (req, res, next) => {
+userRoutes.delete('/:id/delete', async(req, res, next) => {
+    //Finding the user with the URL parameters and sending an goodbye email
+    const user = await User.findOne({_id: req.params.id})
+    const mailG = await transporter.sendMail({
+        from: process.env.GMAIL_ACCOUNT,
+        to: user.email,
+        subject: "We are sad to see you go...",
+        html: goodbye(user)
+    }, (error, info) => error ? console.log(error) : console.log('Email sent: ' + info.response))
+    
     // Finding the user with the URL parameters and errasing it from the DB
-    User.findOneAndDelete({
+    const erraseUser = await User.findOneAndDelete({
         _id: req.params.id
     }, (err, docs) => {
         if (err) {

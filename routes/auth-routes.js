@@ -3,11 +3,10 @@ const authRoutes = express.Router()
 const passport = require('passport')
 const bcrypt = require('bcrypt')
 const User = require('../models/user-model')
-const { hash } = require('bcryptjs')
-
+const {transporter, greetings} = require('../configs/nodemailer-config');
 
 // SIGNUP ROUTES
-authRoutes.post('/signup',(req, res, next) =>{
+authRoutes.post('/signup', (req, res, next) =>{
   // Saving the required data
   const name = req.body.name
   const surname = req.body.surname
@@ -127,6 +126,14 @@ authRoutes.post('/signup',(req, res, next) =>{
           .json({message: 'Something went wrong while saving the user into de database'})
         return;
       }
+
+      // Sending a welcome email to the user
+      const mailG = transporter.sendMail({
+        from: process.env.GMAIL_ACCOUNT,
+        to: email,
+        subject: "Welcome to Roomer!",
+        html: greetings(name, surname, email),
+      }, (error, info) => error ? console.log(error) : console.log('Email sent: ' + info.response))
 
       // Logging in the user after the creation
       req.login(newUser, (err) => {
