@@ -3,6 +3,7 @@ const roomRoutes = express.Router()
 const uploader = require('../configs/cloudinary-config')
 const User = require('../models/user-model')
 const Room = require('../models/room-model')
+const {transporter, offerSend, offerMade, offerDelete, offerWarning} = require('../configs/nodemailer-config');
 
 // ROOMS ROUTE
 roomRoutes.get('/', async(req, res, next) => {
@@ -141,7 +142,8 @@ roomRoutes.post('/add', uploader.array('images'), async(req, res, next) => {
         smokers: smokers,
         tolerance: tolerance,
         title: title,
-        description: description
+        description: description,
+        offers: []
     })
 
     // Saving the new room into the database
@@ -300,6 +302,209 @@ roomRoutes.delete('/:id/delete', (req, res, next) => {
                 .json({message: "The following room has been errased: ", docs})
         }
     }, {new: true})
+})
+
+// SEARCH FOR ALL THE ROOMS THAT AN SPECIFIC USER POSTED
+roomRoutes.get('/userAds/:id', async(req, res, next) => {
+    try {
+        const findAds = await Room
+            .find({owner: req.params.id})
+            .populate("owner")
+            .populate({
+                path: "offers",
+                populate: {
+                    path: "offeror"
+                }
+            })
+
+        res
+            .status(200)
+            .json(findAds)
+    } catch (error) {
+        res
+            .status(500)
+            .json({message: 'Error while trying to retrieve the ads information'})
+    }
+})
+
+// SEARCH FOR THE OFFERS THAT AN SPECIFIC USER MADE
+roomRoutes.get('/userOffers/:id', async(req, res, next) => {
+    try {
+        const findOffers = await Room
+            .find({"offers.offeror": req.params.id})
+            .populate("owner")
+
+        res
+            .status(200)
+            .json(findOffers)
+    } catch (error) {
+        res
+            .status(500)
+            .json({message: 'Error while trying to retrieve the offers information'})
+        next(error)
+    }
+})
+
+// POST AN OFFER AND SEND AN EMAIL
+roomRoutes.put('/:id/newOffer', async(req, res, next) => {
+    try {
+        // Save the required data into variables and checking if it's correct
+        const offerorData = req.body.userId
+        const offerorMessage = req.body.message
+
+        if (offerorData === '' || offerorMessage === '') {
+            res
+                .status(400)
+                .json({message: 'Please, provide all the required information'})
+            return
+        }
+
+        // Save the data for the offer (userId and message)
+        const newOffer = {
+            offeror: offerorData,
+            message: offerorMessage
+        }
+
+        // Find the offeror data
+        const offeror = await User.findOne({_id: req.body.userId})
+
+        // Find the advertised room data push the offer
+        const room = await Room
+            .findOne({_id: req.params.id})
+            .populate("owner")
+            .populate({
+                path: "offers",
+                populate: {
+                    path: "offeror"
+                }
+            })
+
+        // Check if the user has already made an offer
+        let offerIndex = -1;
+
+        for (let i = 0; i < room.offers.length; i++) {
+            if (room.offers[i].offeror == req.body.userId) {
+                offerIndex = i
+            }
+        }
+
+        if (offerIndex === -1) {
+            room
+                .offers
+                .push(newOffer)
+        } else {
+            res
+                .status(400)
+                .json({message: 'You already posted an offer for this advert'})
+            return
+        }
+
+        // Update the room array of offers
+        const roomUpdate = await Room.findOneAndUpdate({
+            _id: req.params.id
+        }, room, {new: true}).populate("owner")
+
+        // Send email to the room owner
+        const mailR = await transporter.sendMail({
+            from: process.env.GMAIL_ACCOUNT,
+            to: room.owner.email,
+            subject: "Someone is interested in your room!",
+            html: offerSend(offeror, room, req.body.message)
+        }, (error, info) => error
+            ? console.log(error)
+            : console.log('Email sent: ' + info.response))
+
+        // Send email to the offeror to have the data
+        const mailO = await transporter.sendMail({
+            from: process.env.GMAIL_ACCOUNT.email,
+            to: offeror.email,
+            subject: "You sent an offer for a room!",
+            html: offerMade(offeror, room, req.body.message)
+        }, (error, info) => error
+            ? console.log(error)
+            : console.log('Email sent: ' + info.response))
+
+        // Send the updated data to the frontend
+        res
+            .status(200)
+            .json(roomUpdate)
+    } catch (error) {
+        res
+            .status(500)
+            .json({message: 'Error while trying to post the offer'})
+        next(error)
+    }
+})
+
+// ERRASE-REMOVE AN OFFER MADE
+roomRoutes.put('/:id/deleteOffer', async(req, res, next) => {
+    try {
+        // Search for the room that the user did the offer
+        const room = await Room
+            .findOne({_id: req.params.id})
+            .populate("owner")
+
+        // Search for the user that wants to retrieve the offer
+        const user = await User.findOne({_id: req.body.userId})
+
+        // Search for the index of the offer that the user did
+        let offerIndex = -1;
+
+        for (let i = 0; i < room.offers.length; i++) {
+            if (room.offers[i].offeror == req.body.userId) {
+                offerIndex = i
+            }
+        }
+
+        // Sent an error if the user's offer was not found
+        if (offerIndex === -1) {
+            res
+                .status(400)
+                .json({message: "The room offer was not found"})
+            return
+        }
+
+        // Take out the offer from the offers array
+        room
+            .offers
+            .splice(offerIndex, 1)
+
+        // Update the room with the new array
+        const roomUpdate = await Room.findByIdAndUpdate({
+            _id: req.params.id
+        }, room, {new: true}).populate("owner")
+
+        // Send an email to the advertiser warning him
+        const mailAD = await transporter.sendMail({
+            from: process.env.GMAIL_ACCOUNT,
+            to: room.owner.email,
+            subject: "The offer that you made was retrieved",
+            html: offerDelete(roomUpdate)
+        }, (error, info) => error
+            ? console.log(error)
+            : console.log('Email sent: ' + info.response))
+
+        // Send an email to the offeror warning him
+        const mailOD = await transporter.sendMail({
+            from: process.env.GMAIL_ACCOUNT,
+            to: user.email,
+            subject: "An offer to your advert was retrieved",
+            html: offerWarning(user, roomUpdate)
+        }, (error, info) => error
+            ? console.log(error)
+            : console.log('Email sent: ' + info.response))
+
+        //Send the updated data to the frontend
+        res
+            .status(200)
+            .json(roomUpdate)
+
+    } catch (error) {
+        res
+            .status(500)
+            .json({message: 'Error while trying to remove the offer'})
+        next(error)
+    }
 })
 
 module.exports = roomRoutes

@@ -129,7 +129,14 @@ const roomSchema = new Schema({
     description: {
         type: String,
         default: 'No description was provided'
-    }
+    },
+    offers: [{
+        message: String,
+        offeror: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+        }
+    }]
 }, {timestamps: true})
 
 const Room = mongoose.model('Room', roomSchema)
