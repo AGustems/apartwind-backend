@@ -4,7 +4,6 @@ const bodyParser   = require('body-parser');
 const cookieParser = require('cookie-parser');
 const express      = require('express');
 const favicon      = require('serve-favicon');
-const hbs          = require('hbs');
 const mongoose     = require('mongoose');
 const logger       = require('morgan');
 const path         = require('path');
@@ -13,6 +12,7 @@ const debug = require('debug')(`${app_name}:${path.basename(__filename).split('.
 const app = express();
 const session       = require('express-session');
 const passport      = require('passport');
+
 const cors = require('cors')
 require('./configs/passport-config');
 
@@ -60,12 +60,17 @@ app.use(
   })
 )
 
-
 // Routes middlewares
 const index = require('./routes/index');
 const authRoutes = require('./routes/auth-routes');
+const userRoutes = require('./routes/user-routes');
+const roomRoutes = require('./routes/room-routes');
+const locationRoutes = require('./routes/location-routes');
 
 app.use('/', index);
-app.use('/auth', authRoutes)
+app.use('/auth', authRoutes);
+app.use('/userprofile', userRoutes);
+app.use('/rooms', roomRoutes);
+app.use('/maps', locationRoutes)
 
 module.exports = app;
