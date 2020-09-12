@@ -38,12 +38,6 @@ roomRoutes.get('/:id', async(req, res, next) => {
         const room = await Room
             .findOne({_id: req.params.id})
             .populate("owner")
-            .populate({
-                path: "offers",
-                populate: {
-                    path: "offeror"
-                }
-            })
 
         if (room === {}) {
             res
@@ -310,6 +304,29 @@ roomRoutes.delete('/:id/delete', (req, res, next) => {
     }, {new: true})
 })
 
+// SEARCH FOR ALL THE ROOMS THAT AN SPECIFIC USER POSTED
+roomRoutes.get('/userAds/:id', async(req, res, next) => {
+    try {
+        const findAds = await Room
+            .find({owner: req.params.id})
+            .populate("owner")
+            .populate({
+                path: "offers",
+                populate: {
+                    path: "offeror"
+                }
+            })
+
+        res
+            .status(200)
+            .json(findAds)
+    } catch (error) {
+        res
+            .status(500)
+            .json({message: 'Error while trying to retrieve the ads information'})
+    }
+})
+
 // SEARCH FOR THE OFFERS THAT AN SPECIFIC USER MADE
 roomRoutes.get('/userOffers/:id', async(req, res, next) => {
     try {
@@ -331,27 +348,61 @@ roomRoutes.get('/userOffers/:id', async(req, res, next) => {
 // POST AN OFFER AND SEND AN EMAIL
 roomRoutes.put('/:id/newOffer', async(req, res, next) => {
     try {
+        // Save the required data into variables and checking if it's correct
+        const offerorData = req.body.userId
+        const offerorMessage = req.body.message
+
+        if (offerorData === '' || offerorMessage === '') {
+            res
+                .status(400)
+                .json({message: 'Please, provide all the required information'})
+            return
+        }
+
         // Save the data for the offer (userId and message)
         const newOffer = {
-            offeror: req.body.userId,
-            message: req.body.message
+            offeror: offerorData,
+            message: offerorMessage
         }
 
         // Find the offeror data
         const offeror = await User.findOne({_id: req.body.userId})
 
-        // Find the advertised room data and push the offer
+        // Find the advertised room data push the offer
         const room = await Room
             .findOne({_id: req.params.id})
             .populate("owner")
-        room
-            .offers
-            .push(newOffer)
+            .populate({
+                path: "offers",
+                populate: {
+                    path: "offeror"
+                }
+            })
+
+        // Check if the user has already made an offer
+        let offerIndex = -1;
+
+        for (let i = 0; i < room.offers.length; i++) {
+            if (room.offers[i].offeror == req.body.userId) {
+                offerIndex = i
+            }
+        }
+
+        if (offerIndex === -1) {
+            room
+                .offers
+                .push(newOffer)
+        } else {
+            res
+                .status(400)
+                .json({message: 'You already posted an offer for this advert'})
+            return
+        }
 
         // Update the room array of offers
         const roomUpdate = await Room.findOneAndUpdate({
             _id: req.params.id
-        }, room, {new: true})
+        }, room, {new: true}).populate("owner")
 
         // Send email to the room owner
         const mailR = await transporter.sendMail({
@@ -400,7 +451,6 @@ roomRoutes.put('/:id/deleteOffer', async(req, res, next) => {
         let offerIndex = -1;
 
         for (let i = 0; i < room.offers.length; i++) {
-            console.log(room.offers[i])
             if (room.offers[i].offeror == req.body.userId) {
                 offerIndex = i
             }
@@ -422,7 +472,7 @@ roomRoutes.put('/:id/deleteOffer', async(req, res, next) => {
         // Update the room with the new array
         const roomUpdate = await Room.findByIdAndUpdate({
             _id: req.params.id
-        }, room, {new: true})
+        }, room, {new: true}).populate("owner")
 
         // Send an email to the advertiser warning him
         const mailAD = await transporter.sendMail({
