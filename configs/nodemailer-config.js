@@ -49,7 +49,7 @@ background-repeat: no-repeat; text-align: center; margin: 0;">
     background-repeat: no-repeat; background-size: cover;  height: 100px;">
       <h3 style="color: white; text-shadow: 5px 5px 5px gray; text-align: center; padding-top:20px;"> Thank you for using Roomer!</h3>
       <p style="color: white; font-weight: 300; font-size: 0.8em; text-align: center;">Go to 
-        <a style="color:white; font-weight: 500;" href="http://roomer.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
+        <a style="color:white; font-weight: 500;" href="http://roomer-app.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
     </div>
   </body>`
 }
@@ -83,7 +83,7 @@ background-repeat: no-repeat; text-align: center; margin: 0;">
     background-repeat: no-repeat; background-size: cover;  height: 100px; width: 100%">
       <h3 style="color: white; text-shadow: 5px 5px 5px gray; text-align: center; padding-top:20px;"> Thank you for using Roomer!</h3>
       <p style="color: white; font-weight: 300; font-size: 0.8em; text-align: center;">Go to 
-        <a style="color:white; font-weight: 500;" href="http://roomer.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
+        <a style="color:white; font-weight: 500;" href="http://roomer-app.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
     </div>
   </body>`
 }
@@ -132,7 +132,7 @@ background-repeat: no-repeat; text-align: center; margin: 0;">
     background-repeat: no-repeat; background-size: cover;  height: 100px;">
       <h3 style="color: white; text-shadow: 5px 5px 5px gray; text-align: center; padding-top:20px;"> Thank you for using Roomer!</h3>
       <p style="color: white; font-weight: 300; font-size: 0.8em; text-align: center; text-shadow: 5px 5px 5px gray;">Go to 
-        <a style="color:white; font-weight: 500;" href="http://roomer.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
+        <a style="color:white; font-weight: 500;" href="http://roomer-app.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
     </div>
   </body>`
 }
@@ -171,7 +171,7 @@ background-repeat: no-repeat; text-align: center; margin: 0;">
     background-repeat: no-repeat; background-size: cover;  height: 100px;">
       <h3 style="color: white; text-shadow: 5px 5px 5px gray; text-align: center; padding-top:20px;"> Thank you for using Roomer!</h3>
       <p style="color: white; font-weight: 300; font-size: 0.8em; text-align: center; text-shadow: 5px 5px 5px gray;">Go to 
-        <a style="color:white; font-weight: 500;" href="http://roomer.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
+        <a style="color:white; font-weight: 500;" href="http://roomer-app.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
     </div>
   </body>`
 }
@@ -205,7 +205,7 @@ const offerDelete = (room) => {
       background-repeat: no-repeat; background-size: cover;  height: 100px; width: 100%">
       <h3 style="color: white; text-shadow: 5px 5px 5px gray; text-align: center; padding-top:20px;"> Thank you for using Roomer!</h3>
       <p style="color: white; font-weight: 300; font-size: 0.8em; text-align: center;">Go to 
-        <a style="color:white; font-weight: 500;" href="http://roomer.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
+        <a style="color:white; font-weight: 500;" href="http://roomer-app.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
     </div>
   </body>`
 }
@@ -239,7 +239,7 @@ const offerWarning = (user, room) => {
       background-repeat: no-repeat; background-size: cover;  height: 100px; width: 100%">
       <h3 style="color: white; text-shadow: 5px 5px 5px gray; text-align: center; padding-top:20px;"> Thank you for using Roomer!</h3>
       <p style="color: white; font-weight: 300; font-size: 0.8em; text-align: center;">Go to 
-        <a style="color:white; font-weight: 500;" href="http://roomer.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
+        <a style="color:white; font-weight: 500;" href="http://roomer-app.herokuapp.com/">Roomer</a> to find your perfect roommate!</p>
     </div>
   </body>`
 
