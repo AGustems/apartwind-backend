@@ -73,4 +73,9 @@ app.use('/userprofile', userRoutes);
 app.use('/rooms', roomRoutes);
 app.use('/maps', locationRoutes)
 
+// Fix routes for deployment
+app.use((req, res, next) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
 module.exports = app;
