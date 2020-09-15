@@ -56,7 +56,7 @@ app.locals.title = 'Roomer - The best platform for finding your new roommate';
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:3000']
+    origin: ['http://localhost:3000', 'http://roomer-app.herokuapp.com/']
   })
 )
 
@@ -74,8 +74,8 @@ app.use('/rooms', roomRoutes);
 app.use('/maps', locationRoutes)
 
 // Fix routes for deployment
-app.use((req, res, next) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
-});
+//app.use((req, res, next) => {
+//  res.sendFile(path.join(__dirname, "build", "index.html"));
+//});
 
 module.exports = app;
