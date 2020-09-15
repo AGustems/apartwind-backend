@@ -56,7 +56,7 @@ app.locals.title = 'Roomer - The best platform for finding your new roommate';
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:3000', 'http://roomer-app.herokuapp.com/']
+    origin: ['http://localhost:3000', 'http://roomer-app.herokuapp.com']
   })
 )
 
