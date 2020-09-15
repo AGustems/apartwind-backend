@@ -135,4 +135,4 @@ room: Room Object ID
 * **GitHub Repository**: [Roomer Repository Frontend](https://github.com/AGustems/roomer-frontend), [Roomer Repository Backend](https://github.com/AGustems/roomer-backend)
 * **Deployed App**: Soon
 * **Trello**: [Trello Board](https://trello.com/b/2dKdlObG/roomer) 
-* **Slides**: Soon
+* **Slides**: []()

@@ -153,7 +153,6 @@ authRoutes.post('/signup', (req, res, next) =>{
   })
 })
 
-
 // LOGIN ROUTE
 authRoutes.post('/login', (req, res, next) => {
   // Authenticating the user 
@@ -188,7 +187,6 @@ authRoutes.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
-
 // LOGOUT ROUTE
 authRoutes.post('/logout', (req, res, next) => {
   req.logout();
@@ -196,7 +194,6 @@ authRoutes.post('/logout', (req, res, next) => {
       .status(200)
       .json({message: 'Log out success!'});
 });
-
 
 // LOG CHECK ROUTE
 authRoutes.get('/loggedin', (req, res, next) => {

@@ -68,10 +68,10 @@ const roomRoutes = require('./routes/room-routes');
 const locationRoutes = require('./routes/location-routes');
 
 app.use('/', index);
-app.use('/auth', authRoutes);
-app.use('/userprofile', userRoutes);
-app.use('/rooms', roomRoutes);
-app.use('/maps', locationRoutes)
+app.use('/api/auth', authRoutes);
+app.use('/api/userprofile', userRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/maps', locationRoutes)
 
 // Fix routes for deployment
 //app.use((req, res, next) => {
