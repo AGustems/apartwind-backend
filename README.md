@@ -133,6 +133,6 @@ room: Room Object ID
 ## Links
 * **Wireframes**: [Roomer Wireframes](https://drive.google.com/drive/folders/1R3W7sfI8RaInJHNq9A_kcw-RFKecBHki?usp=sharing)
 * **GitHub Repository**: [Roomer Repository Frontend](https://github.com/AGustems/roomer-frontend), [Roomer Repository Backend](https://github.com/AGustems/roomer-backend)
-* **Deployed App**: Soon
+* **Deployed App**: [Roomer Heroku Deployment](https://roomer-app.herokuapp.com/)
 * **Trello**: [Trello Board](https://trello.com/b/2dKdlObG/roomer) 
-* **Slides**: []()
+* **Slides**: [Google Slides](https://docs.google.com/presentation/d/1k2gun7eDe3g50GiyUuulCH-vc1K9CdSyvXjoZ1dXHwI/edit?usp=sharing)
