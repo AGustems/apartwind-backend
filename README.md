@@ -34,99 +34,259 @@ List of the features to include outside the MVP:
 
 ## Routes
 #### Auth Routes
-Method  |     URL       |   Description                                          |
-------- | ------------- | ------------------------------------------------------ |
-POST    | /auth/signup  |  Create user and user session. Redirect to /list       |
-POST    | /auth/login   |  Create existent user session. Redirect to /list       |
-POST    | /auth/logout  |  Destroy current user session. Redirect to /           |
+Method  |     URL           |   Description                                          |
+------- | ----------------- | ------------------------------------------------------ |
+POST    | /api/auth/signup  |  Create user and user session. Redirect to /list       |
+POST    | /api/auth/login   |  Create existent user session. Redirect to /list       |
+POST    | /api/auth/logout  |  Destroy current user session. Redirect to /           |
+GET     | /api/auth/loggedin|  Checking if there is a user logged                    |
 
 #### User Routes
-Method  |     URL                |   Description                                          |
-------- | ---------------------- | ------------------------------------------------------ |
-GET     | /userprofile/tenant    | Get the user profile with the tenant look (favourites) |
-GET     | /userprofile/landlord  | Get the user profile with the landlord look (adds)     |
-PUT     | /userprofile/edit      | Update the user data of the user in session            |
-DELETE  | /userprofile/delete    | Delete the user data of the user in session of the DB  |
-GET     | /user/:id              | Get the public information of a particular user        |
+Method  |     URL                     |   Description                                           |
+------- | --------------------------- | ------------------------------------------------------- |
+GET     | /api/userprofile/:id        | Get the user profile information                        |
+PUT     | /api/userprofile/:id        | Update the user data of the user in session             |
+DELETE  | /api/userprofile/:id/delete | Delete the user data of the user in session of the DB   |
 
 #### Rooms Routes
-Method  |     URL                |   Description                                                |
-------- | ---------------------- | ------------------------------------------------------------ |
-GET     | /rooms                 |  Get the list of all the rooms in the database               |
-GET     | /rooms/:id             |  Get the data of a particular room of the database           |
-POST    | /rooms/add             |  Create a new room in the database                           |
-PUT     | /rooms/:id/edit        |  Edit the data of an existing room (only authorised user)    |
-DELETE  | /rooms/:id/delete      |  Delete the room data of the database (only authorised user) |           
+Method  |     URL                   |   Description                                                   |
+------- | ------------------------- | --------------------------------------------------------------- |
+GET     | /api/rooms                |  Get the list of all the rooms in the database                  |
+GET     | /api/rooms/:id            |  Get the data of a particular room of the database              |
+PATCH   | /api/rooms/:id            |  Add/remove a room from the user favourites list                |
+POST    | /api/rooms/add            |  Create a new room in the database                              |
+PUT     | /api/rooms/:id/edit       |  Edit the data of an existing room (only authorised user)       |
+DELETE  | /api/rooms/:id/delete     |  Delete the room data of the database (only authorised user)    |           
+GET     | /api/rooms/userAds/:id    |  Get the list of all the adds posted by the user                |
+GET     | /api/rooms/userOffers/:id |  Get all the offers that the user has recived for his/her adds  |      
+PUT     | /api/rooms/:id/newOffer   |  Post a new offer to a room add                                 |
+PUT     | /api/rooms/:id/deleteOffer|  Delete a room offer to a room add                              |      
+
+
+#### Location Routes
+Method  |     URL                   |   Description                                                   |
+------- | ------------------------- | --------------------------------------------------------------- |
+GET     | /api/location             |  Get location a location with google maps API                   |
 
 
 ## Models
 #### Room Model
 ```
-property: enum['house', 'apartment', 'other'],
-type: enum['former roommate', 'live-in landlord', 'current tenant'],
-location: Location Object ID,
-roomdetails: {
-  price: Number,
-  deposit: Number,
-  size: enum[individual, double],
-  furniture: Boolean
-},
-ammenities: {
-  livingroom: Boolean,
-  internet: Boolean,
-  parking: Boolean,
-  balcony: Boolean,
-  garden: Boolean,
-  daccess: Boolean,
-},
-flatmates:[Number],
-bedbath: [Number],
-smokers: Boolean,
-pets: Boolean,
-livewith: {
-  guys: Boolean,
-  girls: Boolean,
-  couples: Boolean,
-  smokers: Boolean,
-  pets: Boolean,
-  students: Boolean,
-},
-age: [Number],
-availability: Date,
-bills: enum['yes', 'no', 'some']
-adddetails: {
-  title: String,
-  description: String
+owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'You need to be logged in to post an advert']
+    },
+    property: {
+        type: String,
+        enum: [
+            'House', 'Flat', 'Other'
+        ],
+        required: [true, 'You need to specify the property type']
+    },
+    location: {
+        lat: {
+            type: String,
+            required: [true, 'You need to specify the property location']
+        },
+        lng: {
+            type: String,
+            required: [true, 'You need to specify the property location']
+        },
+        direction: {
+            type: String,
+            required: [true, 'You need to specify the property location']
+        }
+    },
+    images: {
+        type: [String],
+        match: [
+            /^(ftp|http|https):\/\/[^ "]+$/, 'Invalid url'
+        ],
+        default: ['https://res.cloudinary.com/agustems/image/upload/v1598881434/roomer/no-image_klmdah.png']
+    },
+    price: {
+        type: Number,
+        required: [true, 'You need to specify the monthly rent']
+    },
+    size: {
+        type: String,
+        enum: [
+            'individual', 'double'
+        ],
+        required: [true, 'You need to specigy the room size']
+    },
+    availability: Date,
+    amenities: {
+        living: {
+            type: Boolean,
+            default: false
+        },
+        internet: {
+            type: Boolean,
+            default: false
+        },
+        parking: {
+            type: Boolean,
+            default: false
+        },
+        balcony: {
+            type: Boolean,
+            default: false
+        },
+        garden: {
+            type: Boolean,
+            default: false
+        },
+        dacces: {
+            type: Boolean,
+            default: false
+        }
+    },
+    flatmates: {
+        type: [Number],
+        default: [0, 0]
+    },
+    bedrooms: {
+        type: Number,
+        required: true,
+        match: [/^(?:[1-9]\d+|[2-9])$/gm, 'There has to be at least one bedroom']
+    },
+    bathrooms: {
+        type: Number,
+        required: true,
+        match: [/^(?:[1-9]\d+|[1-9])$/gm, 'There has to be at least one bathroom']
+    },
+    pets: {
+        type: Boolean,
+        default: false
+    },
+    smokers: {
+        type: Boolean,
+        default: false
+    },
+    tolerance: {
+        guys: {
+            type: Boolean,
+            default: false
+        },
+        girls: {
+            type: Boolean,
+            default: false
+        },
+        couples: {
+            type: Boolean,
+            default: false
+        },
+        smokers: {
+            type: Boolean,
+            default: false
+        },
+        students: {
+            type: Boolean,
+            default: false
+        },
+        pets: {
+            type: Boolean,
+            default: false
+        }
+    },
+    title: {
+        type: String,
+        default: 'No title was provided'
+    },
+    description: {
+        type: String,
+        default: 'No description was provided'
+    },
+    offers: [{
+        message: String,
+        offeror: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+        }
+    }]
 }
 ```
 
 #### User Model
 ```
-type: enum['tenant', 'landlord'],
-name: String,
-surname: String,
-location: Location Object ID,
-email: String,
-password: String,
-description: String,
-characteristics: [String],
-socials: {
-  facebook: String,
-  twitter: String,
-  instagram: String,
-},
-favourites: [Room Object ID],
-adverts: [Room Object ID]
-```
-
-#### Location Model
-```
-name: String,
-address: String,
-formatted_address: String,
-lat: Number,
-lng: Number,
-room: Room Object ID
+name: {
+        type: String,
+        required: [true, 'The name is required']
+    },
+    surname: {
+        type: String,
+        required: [true, 'The surname is required']
+    },
+    email: {
+        type: String,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/^\S+@\S+\.\S+$/, 'Invalid email address'],
+        required: [true, 'The email is required'],
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    occupation: {
+        type: String,
+        default: 'Not Specified'
+    },
+    imageUrl: {
+        type: String,
+        match: [
+            /^(ftp|http|https):\/\/[^ "]+$/, 'Invalid url'
+        ],
+        default: 'https://res.cloudinary.com/agustems/image/upload/v1598692094/roomer/newUser_pmu8bv.png'
+    },
+    age: {
+        type: Number,
+        default: 0
+    },
+    description: {
+        type: String,
+        default: "There isn't any description for this user yet."
+    },
+    characteristics: [String],
+    socials: {
+        facebook: {
+            type: String,
+            match: [
+                /^(https?:\/\/){0,1}(www\.){0,1}facebook\.com/gm, 'Invalid Facebook address'
+            ],
+            default: 'No facebook account information provided'
+        },
+        twitter: {
+            type: String,
+            match: [
+                /^(https?:\/\/){0,1}(www\.){0,1}twitter\.com/gm, 'Invalid Facebook address'
+            ],
+            default: 'No twitter account information provided'
+        },
+        instagram: {
+            type: String,
+            match: [
+                /^(https?:\/\/){0,1}(www\.){0,1}instagram\.com/gm, 'Invalid Instagram address'
+            ],
+            default: 'No instagram account information provided'
+        }
+    },
+    favourites: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Room'
+        }
+    ],
+    adverts: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Room'
+        }
+    ]
+}
 ```
 
 
